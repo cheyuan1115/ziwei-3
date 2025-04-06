@@ -113,40 +113,39 @@
         return;
       }
 
-      fetch("https://www.dearmoney.idv.tw/ziweiapi", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          sex: gender,
-          birth: birth,
-          hour: parseInt(hour),
-          calendar: "solar"
-        })
-      })
-      .then(res => res.json())
-      .then(result => {
-        const star = result.ming_gong_main_star;
-        if (!star) {
-          alert("無法取得主星");
-          return;
-        }
-        fetch("https://script.google.com/macros/s/AKfycbwiZpI9cH_YQIPXpu733EaVnj69LQUM_aSZTWB7f2sdudnocQxD5pNcozd5wHkojYA_LQ/exec?star=" + encodeURIComponent(star))
-          .then(response => response.json())
-          .then(data => {
-            document.getElementById("starName").textContent = data.star;
-            document.getElementById("scent").textContent = data.scent;
-            document.getElementById("quote").textContent = data.quote;
-            document.getElementById("usage").textContent = data.usage;
-            document.getElementById("cardImg").src = data.img || "https://i.imgur.com/CEFg3gM.png";
-            document.getElementById("cardBox").style.display = "block";
-          });
-      })
-      .catch(error => {
-        console.error(error);
-        alert("命盤計算失敗");
-      });
+fetch("https://api.zhenji.tech/api/birth_chart", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    gender: gender === "male" ? "male" : "female",  // "male" or "female"
+    year: new Date(birth).getFullYear(),
+    month: new Date(birth).getMonth() + 1,
+    day: new Date(birth).getDate(),
+    hour: parseInt(hour) // 0–23 的整數時辰
+  })
+})
+.then(res => res.json())
+.then(result => {
+  if (!result.ming_gong || !result.ming_gong.main_star) {
+    alert("命盤計算失敗");
+    return;
+  }
+
+  const star = result.ming_gong.main_star;
+  fetch("https://script.google.com/macros/s/AKfycbwiZpI9cH_YQIPXpu733EaVnj69LQUM_aSZTWB7f2sdudnocQxD5pNcozd5wHkojYA_LQ/exec?star=" + encodeURIComponent(star))
+    .then(response => response.json())
+    .then(data => {
+      // 在這裡顯示香氣卡片內容
+      console.log(data);
+    });
+})
+.catch(err => {
+  console.error("命盤 API 錯誤", err);
+  alert("命盤計算失敗，請稍後再試");
+});
+
     }
   </script>
 </body>
