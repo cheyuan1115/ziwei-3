@@ -1,0 +1,153 @@
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>紫微命盤 × 香氣推薦卡</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Noto Serif TC', serif;
+      background: linear-gradient(to right, #fdfcfb, #e8f5e9);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 600px;
+      width: 90%;
+      background: #ffffffcc;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    h1 {
+      color: #305f50;
+      margin-bottom: 20px;
+    }
+    input, select {
+      padding: 10px;
+      margin: 10px 5px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      width: 40%;
+    }
+    button {
+      background-color: #7bb89c;
+      color: white;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #619c80;
+    }
+    .card {
+      margin-top: 30px;
+      display: none;
+    }
+    .card img {
+      width: 60%;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .card h2 {
+      color: #4a3c32;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>紫微命盤 × 香氣推薦</h1>
+    <p>請輸入生日與性別：</p>
+    <input type="date" id="birthdate" />
+    <select id="hour">
+      <option value="">出生時辰</option>
+      <option value="0">子（23-1）</option>
+      <option value="1">丑（1-3）</option>
+      <option value="2">寅（3-5）</option>
+      <option value="3">卯（5-7）</option>
+      <option value="4">辰（7-9）</option>
+      <option value="5">巳（9-11）</option>
+      <option value="6">午（11-13）</option>
+      <option value="7">未（13-15）</option>
+      <option value="8">申（15-17）</option>
+      <option value="9">酉（17-19）</option>
+      <option value="10">戌（19-21）</option>
+      <option value="11">亥（21-23）</option>
+    </select>
+    <select id="gender">
+      <option value="">性別</option>
+      <option value="M">男性</option>
+      <option value="F">女性</option>
+    </select>
+    <br />
+    <button onclick="getStar()">產生命宮主星並抽卡</button>
+
+    <div class="card" id="cardBox">
+      <img id="cardImg" src="" alt="香氣牌圖">
+      <h2 id="starName"></h2>
+      <p><strong>香氣組合：</strong><span id="scent"></span></p>
+      <p><strong>語錄：</strong><span id="quote"></span></p>
+      <p><strong>使用建議：</strong><span id="usage"></span></p>
+    </div>
+  </div>
+
+  <script>
+    function getStar() {
+      const birth = document.getElementById("birthdate").value;
+      const hour = document.getElementById("hour").value;
+      const gender = document.getElementById("gender").value;
+
+      if (!birth || hour === "" || gender === "") {
+        alert("請填寫完整生日、時辰與性別");
+        return;
+      }
+
+      fetch("https://www.dearmoney.idv.tw/ziweiapi", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          sex: gender,
+          birth: birth,
+          hour: parseInt(hour),
+          calendar: "solar"
+        })
+      })
+      .then(res => res.json())
+      .then(result => {
+        const star = result.ming_gong_main_star;
+        if (!star) {
+          alert("無法取得主星");
+          return;
+        }
+        fetch("https://script.google.com/macros/s/AKfycbwiZpI9cH_YQIPXpu733EaVnj69LQUM_aSZTWB7f2sdudnocQxD5pNcozd5wHkojYA_LQ/exec?star=" + encodeURIComponent(star))
+          .then(response => response.json())
+          .then(data => {
+            document.getElementById("starName").textContent = data.star;
+            document.getElementById("scent").textContent = data.scent;
+            document.getElementById("quote").textContent = data.quote;
+            document.getElementById("usage").textContent = data.usage;
+            document.getElementById("cardImg").src = data.img || "https://i.imgur.com/CEFg3gM.png";
+            document.getElementById("cardBox").style.display = "block";
+          });
+      })
+      .catch(error => {
+        console.error(error);
+        alert("命盤計算失敗");
+      });
+    }
+  </script>
+</body>
+</html>
