@@ -1,91 +1,105 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>星座運勢 × 香氛推薦</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>星座香氛推薦</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <style>
     body {
       font-family: 'Noto Sans TC', sans-serif;
+      background: linear-gradient(to bottom, #ffe4e1, #fefefe);
       margin: 0;
-      padding: 0;
-      background: #f9f9f9;
+      padding: 2rem;
       color: #333;
     }
-    header {
-      background: linear-gradient(to right, #ffd1dc, #ffe8d6);
-      padding: 2rem;
+    h1 {
       text-align: center;
-    }
-    header h1 {
-      margin: 0;
       font-size: 2rem;
     }
-    .container {
-      padding: 2rem;
-      max-width: 800px;
-      margin: auto;
-    }
-    .zodiac-card {
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      margin-bottom: 1.5rem;
-      padding: 1.5rem;
-    }
-    .zodiac-card h2 {
-      margin-top: 0;
-      font-size: 1.25rem;
-      color: #cc3366;
-    }
-    .zodiac-card p {
-      margin: 0.5rem 0;
-    }
-    footer {
+    .form {
       text-align: center;
-      padding: 2rem;
-      color: #999;
-      font-size: 0.9rem;
+      margin-bottom: 2rem;
+    }
+    .card {
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      padding: 1.5rem;
+      max-width: 500px;
+      margin: 1rem auto;
+    }
+    .error {
+      color: red;
+      text-align: center;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>每日星座運勢 × 香氛建議</h1>
-    <p>從星象看今日能量，搭配專屬香氛提振氣場</p>
-  </header>
-  <div class="container" id="zodiacContainer">
-    <p>載入中...</p>
+  <h1>星座香氛推薦</h1>
+  <div class="form">
+    <label>輸入生日：</label>
+    <input type="date" id="birthdate" />
+    <button onclick="getHoroscope()">查看運勢</button>
   </div>
-  <footer>
-    © 2025 星座香氣日誌 ｜ 由 GPT & Google Sheet 提供每日資料
-  </footer>
+  <div id="result"></div>
 
   <script>
-    const SHEET_API = 'https://script.google.com/macros/s/AKfycbzYCZAldcntspzyX5fORu_hSknQIkr9OXGTazEwjgsXoArLt0cUrrsazUfUAfJ5WwPt6g/exec?sheet=Zodiac';
+    const zodiacMap = [
+      { sign: '摩羯座', start: '01-01', end: '01-19' },
+      { sign: '水瓶座', start: '01-20', end: '02-18' },
+      { sign: '雙魚座', start: '02-19', end: '03-20' },
+      { sign: '牡羊座', start: '03-21', end: '04-19' },
+      { sign: '金牛座', start: '04-20', end: '05-20' },
+      { sign: '雙子座', start: '05-21', end: '06-20' },
+      { sign: '巨蟹座', start: '06-21', end: '07-22' },
+      { sign: '獅子座', start: '07-23', end: '08-22' },
+      { sign: '處女座', start: '08-23', end: '09-22' },
+      { sign: '天秤座', start: '09-23', end: '10-22' },
+      { sign: '天蠍座', start: '10-23', end: '11-21' },
+      { sign: '射手座', start: '11-22', end: '12-21' },
+      { sign: '摩羯座', start: '12-22', end: '12-31' },
+    ];
 
-    fetch(SHEET_API)
-      .then(res => res.json())
-      .then(data => {
-        const container = document.getElementById('zodiacContainer');
-        container.innerHTML = '';
-        data.forEach(row => {
-          const [star, quote, aroma] = row;
-          const card = document.createElement('div');
-          card.className = 'zodiac-card';
-          card.innerHTML = `
-            <h2>${star}</h2>
-            <p><strong>今日運勢：</strong>${quote}</p>
-            <p><strong>推薦香氛：</strong>${aroma}</p>
-          `;
-          container.appendChild(card);
-        });
-      })
-      .catch(err => {
-        document.getElementById('zodiacContainer').innerHTML = '<p>無法載入星座資料，請稍後再試。</p>';
-        console.error('Fetch error:', err);
-      });
+    function getZodiac(month, day) {
+      const mmdd = `${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+      return zodiacMap.find(z => mmdd >= z.start && mmdd <= z.end)?.sign || '未知';
+    }
+
+    async function getHoroscope() {
+      const date = document.getElementById('birthdate').value;
+      const resultDiv = document.getElementById('result');
+      resultDiv.innerHTML = '';
+
+      if (!date) {
+        resultDiv.innerHTML = '<p class="error">請先輸入生日</p>';
+        return;
+      }
+
+      const [year, month, day] = date.split('-').map(Number);
+      const zodiac = getZodiac(month, day);
+
+      try {
+        const res = await axios.get('https://script.google.com/macros/s/AKfycbwiZpI9cH_YQIPXpu733EaVnj69LQUM_aSZTWB7f2sdudnocQxD5pNcozd5wHkojYA_LQ/exec');
+        const data = res.data.find(item => item.star === zodiac);
+
+        if (!data) {
+          resultDiv.innerHTML = '<p class="error">找不到對應的星座資料</p>';
+          return;
+        }
+
+        resultDiv.innerHTML = `
+          <div class="card">
+            <h2>${zodiac}</h2>
+            <p><strong>今日運勢：</strong>${data.quote}</p>
+            <p><strong>推薦香氛：</strong>${data.recommend || '無資料'}</p>
+          </div>
+        `;
+      } catch (error) {
+        resultDiv.innerHTML = '<p class="error">無法取得資料，請稍後再試。</p>';
+      }
+    }
   </script>
 </body>
 </html>
