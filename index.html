@@ -82,7 +82,7 @@
 
       try {
         const res = await axios.get('https://script.google.com/macros/s/AKfycbz_MCZrjkTqdYI1coLdax2YAd4ZPJkOuSHvmbjjCvM90VCcpNpWLMnsO6wbgUfDOfT5hw/exec');
-        const data = res.data.find(item => item.star === zodiac);
+        const data = res.data.find(item => item.Zodiac === zodiac);
 
         if (!data) {
           resultDiv.innerHTML = '<p class="error">找不到對應的星座資料</p>';
@@ -92,8 +92,8 @@
         resultDiv.innerHTML = `
           <div class="card">
             <h2>${zodiac}</h2>
-            <p><strong>今日運勢：</strong>${data.quote}</p>
-            <p><strong>推薦香氛：</strong>${data.recommend || '無資料'}</p>
+            <p><strong>今日運勢：</strong>${data.Quote}</p>
+            <p><strong>推薦香氛：</strong>${data.Recommend || '無資料'}</p>
           </div>
         `;
       } catch (error) {
