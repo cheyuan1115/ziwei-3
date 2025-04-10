@@ -81,7 +81,8 @@
       const zodiac = getZodiac(month, day);
 
       try {
-const res = await axios.get('https://script.google.com/macros/s/AKfycbwTpAsttyTRJOJTZ5RE8aJOEcvF0voyYh0VWatMCYRus1jYnerLt-aQYKgajyioXiCMw/exec');
+const res = await axios.get('https://script.googleusercontent.com/macros/echo?user_content_key=AehSKLi25AWOXWYviZ-P1UGSrMITmxLL3Duj-xiuRwO-dZ9QMiKyNqJv9RGtxG3kpvpTEdQbr2mDQg4WUybOV0IRmyk_lGtCuDukI1M9tqsjU5clyA-2eqQlq7iWUyKzcWWEPOw0VABuXWPr3dF5fm9w0Fu9DAiY-QSgEWo2oOOKKnHXVMvzDGSgNbtBUlNnYaOxlvyVBKCfARJKxPl45nNigg2vVza_RuhVZcES1kunLGnb4bmZ0vQtmloda18e3I9PBPAkFH8WYDkik9AkSOv2ncLO3ShU_JHf1FNc7a_I&lib=MDfsA4OsT_1SO_VAN_WKYhAhmSJcLk01C
+');
         const data = res.data.find(item => item.star === zodiac);
 
         if (!data) {
