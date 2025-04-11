@@ -63,13 +63,20 @@
     .recommend-box small {
       color: #666;
     }
+    input[type="text"] {
+      padding: 0.5rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 0.3rem;
+      width: 180px;
+    }
   </style>
 </head>
 <body>
   <h1>星座香氛推薦</h1>
   <div class="form">
-    <label>輸入生日：</label>
-    <input type="date" id="birthdate" />
+    <label>輸入生日（YYYY-MM-DD）：</label>
+    <input type="text" id="birthdate" placeholder="例如 1990-04-11" />
     <button onclick="getHoroscope()">查看運勢</button>
   </div>
   <div id="result"></div>
@@ -96,15 +103,28 @@
       return zodiacMap.find(z => mmdd >= z.start && mmdd <= z.end) || { sign: '未知', icon: '' };
     }
 
+    function saveBirthdayToLocalStorage(date) {
+      localStorage.setItem('user_birthday', date);
+    }
+
+    function loadBirthdayFromLocalStorage() {
+      const savedDate = localStorage.getItem('user_birthday');
+      if (savedDate) {
+        document.getElementById('birthdate').value = savedDate;
+      }
+    }
+
     async function getHoroscope() {
-      const date = document.getElementById('birthdate').value;
+      const date = document.getElementById('birthdate').value.trim();
       const resultDiv = document.getElementById('result');
       resultDiv.innerHTML = '';
 
-      if (!date) {
-        resultDiv.innerHTML = '<p class="error">請先輸入生日</p>';
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+        resultDiv.innerHTML = '<p class="error">請輸入正確格式的生日，例如 1990-04-11</p>';
         return;
       }
+
+      saveBirthdayToLocalStorage(date);
 
       const [year, month, day] = date.split('-').map(Number);
       const { sign: zodiac, icon } = getZodiac(month, day);
@@ -134,6 +154,8 @@
         resultDiv.innerHTML = '<p class="error">無法取得資料，請稍後再試。</p>';
       }
     }
+
+    window.onload = loadBirthdayFromLocalStorage;
   </script>
 </body>
 </html>
