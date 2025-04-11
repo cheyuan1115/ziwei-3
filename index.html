@@ -16,7 +16,14 @@
     }
     h1 {
       text-align: center;
-      font-size: 2rem;
+      font-size: 2.5rem;
+      margin-bottom: 0.2rem;
+    }
+    h2 {
+      font-size: 1.5rem;
+    }
+    p {
+      line-height: 1.6;
     }
     .form {
       text-align: center;
@@ -26,13 +33,35 @@
       background: white;
       border-radius: 1rem;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      padding: 1.5rem;
-      max-width: 500px;
+      padding: 2rem;
+      max-width: 600px;
       margin: 1rem auto;
     }
     .error {
       color: red;
       text-align: center;
+    }
+    .icon {
+      text-align: center;
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+    .date-info {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #666;
+      margin-top: -1rem;
+      margin-bottom: 1.5rem;
+    }
+    .recommend-box {
+      background-color: #fff4e6;
+      padding: 1rem;
+      border-left: 4px solid #ff9800;
+      border-radius: 0.5rem;
+      margin-top: 1rem;
+    }
+    .recommend-box small {
+      color: #666;
     }
   </style>
 </head>
@@ -47,24 +76,24 @@
 
   <script>
     const zodiacMap = [
-      { sign: '摩羯座', start: '01-01', end: '01-19' },
-      { sign: '水瓶座', start: '01-20', end: '02-18' },
-      { sign: '雙魚座', start: '02-19', end: '03-20' },
-      { sign: '牡羊座', start: '03-21', end: '04-19' },
-      { sign: '金牛座', start: '04-20', end: '05-20' },
-      { sign: '雙子座', start: '05-21', end: '06-20' },
-      { sign: '巨蟹座', start: '06-21', end: '07-22' },
-      { sign: '獅子座', start: '07-23', end: '08-22' },
-      { sign: '處女座', start: '08-23', end: '09-22' },
-      { sign: '天秤座', start: '09-23', end: '10-22' },
-      { sign: '天蠍座', start: '10-23', end: '11-21' },
-      { sign: '射手座', start: '11-22', end: '12-21' },
-      { sign: '摩羯座', start: '12-22', end: '12-31' },
+      { sign: '摩羯座', start: '01-01', end: '01-19', icon: '♑' },
+      { sign: '水瓶座', start: '01-20', end: '02-18', icon: '♒' },
+      { sign: '雙魚座', start: '02-19', end: '03-20', icon: '♓' },
+      { sign: '牡羊座', start: '03-21', end: '04-19', icon: '♈' },
+      { sign: '金牛座', start: '04-20', end: '05-20', icon: '♉' },
+      { sign: '雙子座', start: '05-21', end: '06-20', icon: '♊' },
+      { sign: '巨蟹座', start: '06-21', end: '07-22', icon: '♋' },
+      { sign: '獅子座', start: '07-23', end: '08-22', icon: '♌' },
+      { sign: '處女座', start: '08-23', end: '09-22', icon: '♍' },
+      { sign: '天秤座', start: '09-23', end: '10-22', icon: '♎' },
+      { sign: '天蠍座', start: '10-23', end: '11-21', icon: '♏' },
+      { sign: '射手座', start: '11-22', end: '12-21', icon: '♐' },
+      { sign: '摩羯座', start: '12-22', end: '12-31', icon: '♑' },
     ];
 
     function getZodiac(month, day) {
       const mmdd = `${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-      return zodiacMap.find(z => mmdd >= z.start && mmdd <= z.end)?.sign || '未知';
+      return zodiacMap.find(z => mmdd >= z.start && mmdd <= z.end) || { sign: '未知', icon: '' };
     }
 
     async function getHoroscope() {
@@ -78,7 +107,7 @@
       }
 
       const [year, month, day] = date.split('-').map(Number);
-      const zodiac = getZodiac(month, day);
+      const { sign: zodiac, icon } = getZodiac(month, day);
 
       try {
         const res = await axios.get('https://script.google.com/macros/s/AKfycbz_MCZrjkTqdYI1coLdax2YAd4ZPJkOuSHvmbjjCvM90VCcpNpWLMnsO6wbgUfDOfT5hw/exec');
@@ -91,9 +120,14 @@
 
         resultDiv.innerHTML = `
           <div class="card">
+            <div class="icon">${icon}</div>
             <h2>${zodiac}</h2>
-            <p><strong>今日運勢：</strong>${data.Quote}</p>
-            <p><strong>推薦香氛：</strong>${data.Recommend || '無資料'}</p>
+            <div class="date-info">${new Date().toLocaleDateString()} 今日運勢</div>
+            <p><strong>原因與分析：</strong>${data.Quote}</p>
+            <div class="recommend-box">
+              <p style="margin: 0;"><strong>推薦香氛：</strong>${data.Recommend || '無資料'}</p>
+              <small>適合用於今天的能量調整與香氛冥想</small>
+            </div>
           </div>
         `;
       } catch (error) {
